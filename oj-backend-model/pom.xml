@@ -11,6 +11,14 @@
 
     <artifactId>oj-backend-model</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.oj</groupId>
+            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>oj-backend-common</artifactId>
+        </dependency>
+    </dependencies>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

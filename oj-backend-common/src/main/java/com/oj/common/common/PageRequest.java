@@ -1,6 +1,6 @@
 package com.oj.common.common;
 
-import com.dlwlrma.oj.constant.CommonConstant;
+import com.oj.common.constant.CommonConstant;
 import lombok.Data;
 
 /**

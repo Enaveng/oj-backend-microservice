@@ -1,8 +1,9 @@
 package com.oj.common.exception;
 
-import com.dlwlrma.oj.common.BaseResponse;
-import com.dlwlrma.oj.common.ErrorCode;
-import com.dlwlrma.oj.common.ResultUtils;
+
+import com.oj.common.common.BaseResponse;
+import com.oj.common.common.ErrorCode;
+import com.oj.common.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 全局异常处理器
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @RestControllerAdvice
 @Slf4j
