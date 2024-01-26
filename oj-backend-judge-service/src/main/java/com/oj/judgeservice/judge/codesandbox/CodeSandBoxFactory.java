@@ -8,7 +8,7 @@ import com.oj.judgeservice.judge.codesandbox.impl.ThirdPartyCodeSandBox;
 /**
  * 代码沙箱工厂（根据字符串参数创建指定的代码沙箱实例）
  */
-public class CodeSanBoxFactory {
+public class CodeSandBoxFactory {
     public static CodeSandBox createCodeSandBoxByType(String type) {
         switch (type) {
             case "Example":

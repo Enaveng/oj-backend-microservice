@@ -1,9 +1,10 @@
 package com.oj.judgeservice.judge;
 
 import cn.hutool.json.JSONUtil;
+import com.oj.client.service.QuestionServiceFeignClient;
 import com.oj.common.common.ErrorCode;
 import com.oj.common.exception.BusinessException;
-import com.oj.judgeservice.judge.codesandbox.CodeSanBoxFactory;
+import com.oj.judgeservice.judge.codesandbox.CodeSandBoxFactory;
 import com.oj.judgeservice.judge.codesandbox.CodeSanBoxProxy;
 import com.oj.judgeservice.judge.codesandbox.CodeSandBox;
 import com.oj.judgeservice.judge.startegy.JudgeContext;
@@ -14,8 +15,6 @@ import com.oj.model.dto.question.JudgeInfo;
 import com.oj.model.entity.Question;
 import com.oj.model.entity.QuestionSubmit;
 import com.oj.model.enums.QuestionSubmitStatusEnum;
-import com.oj.questionservice.service.QuestionService;
-import com.oj.questionservice.service.QuestionSubmitService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -30,23 +29,20 @@ public class JudgeServiceImpl implements JudgeService {
     private String type;
 
     @Resource
-    private QuestionSubmitService questionSubmitService;
-
-    @Resource
-    private QuestionService questionService;
+    private QuestionServiceFeignClient questionServiceFeignClient;
 
 
     @Override
     public QuestionSubmit doJudge(long questionSubmitId) {
         //根据传入题目的提交id 获取到对应的题目、题目提交信息(包括代码、编程语言等)
-        QuestionSubmit questionSubmit = questionSubmitService.getById(questionSubmitId);
+        QuestionSubmit questionSubmit = questionServiceFeignClient.getQuestionSubmitById(questionSubmitId);
         if (questionSubmit == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "提交的题目不存在");
         }
         //通过提交的题目得到对应的题目id
         Long questionId = questionSubmit.getQuestionId();
         //根据id进行题目的查询
-        Question question = questionService.getById(questionId);
+        Question question = questionServiceFeignClient.getQuestionById(questionId);
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目信息不存在");
         }
@@ -58,12 +54,12 @@ public class JudgeServiceImpl implements JudgeService {
         QuestionSubmit questionSubmitUpdate = new QuestionSubmit();
         questionSubmitUpdate.setId(questionSubmitId);
         questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.RUNNING.getValue());
-        boolean update = questionSubmitService.updateById(questionSubmitUpdate);
+        boolean update = questionServiceFeignClient.updateQuestionSubmitById(questionSubmitUpdate);
         if (!update) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
         }
         //调用代码沙箱得到执行结果
-        CodeSandBox codeSandBox = CodeSanBoxFactory.createCodeSandBoxByType(type);
+        CodeSandBox codeSandBox = CodeSandBoxFactory.createCodeSandBoxByType(type);
         CodeSanBoxProxy codeSanBoxProxy = new CodeSanBoxProxy(codeSandBox);
         String language = questionSubmit.getLanguage();
         String code = questionSubmit.getCode();
@@ -92,11 +88,11 @@ public class JudgeServiceImpl implements JudgeService {
         //将JudgeInfo对象转换为json对象
         questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(judgeInfo));
         questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
-        update = questionSubmitService.updateById(questionSubmitUpdate);
+        update = questionServiceFeignClient.updateQuestionSubmitById(questionSubmitUpdate);
         if (!update) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新错误");
         }
-        QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionId);
+        QuestionSubmit questionSubmitResult = questionServiceFeignClient.getQuestionSubmitById(questionId);
         return questionSubmitResult;
     }
 }

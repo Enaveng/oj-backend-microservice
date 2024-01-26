@@ -44,8 +44,12 @@ spring:
 server:
   address: 0.0.0.0
   port: 8103
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
   servlet:
-    context-path: /api
+    context-path: /api/question
     # cookie 30 天过期
     session:
       cookie:

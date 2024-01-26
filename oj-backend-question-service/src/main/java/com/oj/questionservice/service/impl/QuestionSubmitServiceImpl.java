@@ -4,11 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.oj.client.service.JudgeServiceFeignClient;
+import com.oj.client.service.UserServiceFeignClient;
 import com.oj.common.common.ErrorCode;
 import com.oj.common.constant.CommonConstant;
 import com.oj.common.exception.BusinessException;
 import com.oj.common.utils.SqlUtils;
-import com.oj.judgeservice.judge.JudgeService;
 import com.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
 import com.oj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
 import com.oj.model.entity.QuestionSubmit;
@@ -18,7 +19,6 @@ import com.oj.model.enums.QuestionSubmitStatusEnum;
 import com.oj.model.vo.QuestionSubmitVO;
 import com.oj.questionservice.mapper.QuestionSubmitMapper;
 import com.oj.questionservice.service.QuestionSubmitService;
-import com.oj.user.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,11 +41,11 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
 
 
     @Resource
-    private UserService userService;
+    private UserServiceFeignClient userServiceFeignClient;
 
     @Resource
     @Lazy
-    private JudgeService judgeService;
+    private JudgeServiceFeignClient judgeService;
 
     //返回题目的提交id
     @Override
@@ -119,7 +119,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         // 脱敏：仅本人和管理员能看见自己（提交 userId 和登录用户 id 不同）提交的代码
         long userId = loginUser.getId();
         // 处理脱敏
-        if (userId != questionSubmit.getUserId() && !userService.isAdmin(loginUser)) {
+        if (userId != questionSubmit.getUserId() && !userServiceFeignClient.isAdmin(loginUser)) {
             questionSubmitVO.setCode(null);
         }
         return questionSubmitVO;
