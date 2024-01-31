@@ -47,6 +47,7 @@ public class DefaultJudgeStrategy implements JudgeStrategy {
         JudgeConfig config = JSONUtil.toBean(judgeConfig, JudgeConfig.class);
         long memoryLimit = config.getMemoryLimit();
         long timeLimit = config.getTimeLimit();
+        //判断代码运行信息是否违背要求
         if (memory > memoryLimit) {
             judgeInfoMessageEnum = JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED;
             judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());

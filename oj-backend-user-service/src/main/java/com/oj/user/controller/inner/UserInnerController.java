@@ -1,6 +1,7 @@
 package com.oj.user.controller.inner;
 
 
+import com.oj.client.service.UserServiceFeignClient;
 import com.oj.model.entity.User;
 import com.oj.user.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/inner")
-public class UserInnerController {
+public class UserInnerController  {
 
     @Resource
     private UserService userService;
@@ -29,7 +30,7 @@ public class UserInnerController {
      * @return
      */
     @GetMapping("/get/ids")
-    public List<User> getByIdList(@RequestParam("idList") Collection<Long> idList) {
+    public List<User> listByIds(@RequestParam("idList") Collection<Long> idList) {
         List<User> users = userService.listByIds(idList);
         return users;
     }

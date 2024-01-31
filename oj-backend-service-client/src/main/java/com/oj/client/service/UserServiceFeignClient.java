@@ -82,17 +82,16 @@ public interface UserServiceFeignClient {
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return userVO;
-
     }
 
     /**
      * 根据id获取用户信息
      *
-     * @param id
+     * @param userId
      * @return
      */
     @GetMapping("/inner/get/id")
-    User getById(@RequestParam("id") long id);
+    User getById(@RequestParam("userId") long userId);
 }
 
 

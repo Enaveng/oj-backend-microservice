@@ -2,7 +2,6 @@ package com.oj.common.common;
 
 /**
  * 自定义错误码
- *
  */
 public enum ErrorCode {
 
@@ -12,9 +11,10 @@ public enum ErrorCode {
     NO_AUTH_ERROR(40101, "无权限"),
     NOT_FOUND_ERROR(40400, "请求数据不存在"),
     FORBIDDEN_ERROR(40300, "禁止访问"),
+    TOO_MANY_REQUEST(40500, "请求过于频繁"),
     SYSTEM_ERROR(50000, "系统内部异常"),
     OPERATION_ERROR(50001, "操作失败"),
-    API_REQUEST_ERROR(50010,"接口调用失败");
+    API_REQUEST_ERROR(50010, "接口调用失败");
 
     /**
      * 状态码

@@ -24,6 +24,7 @@ import com.oj.questionservice.service.QuestionService;
 import com.oj.questionservice.service.QuestionSubmitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.repository.util.QueryExecutionConverters;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

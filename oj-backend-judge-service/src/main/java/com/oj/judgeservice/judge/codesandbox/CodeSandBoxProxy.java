@@ -7,11 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 
 //代理模式 在每次使用代码沙箱时都将输入输出通过日志打印出来
 @Slf4j
-public class CodeSanBoxProxy implements CodeSandBox {
+public class CodeSandBoxProxy implements CodeSandBox {
 
     private final CodeSandBox codeSandBox;
 
-    public CodeSanBoxProxy(CodeSandBox codeSandBox) {
+    public CodeSandBoxProxy(CodeSandBox codeSandBox) {
         this.codeSandBox = codeSandBox;
     }
 

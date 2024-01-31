@@ -17,7 +17,9 @@ import com.oj.model.entity.User;
 import com.oj.model.enums.QuestionSubmitLanguageEnum;
 import com.oj.model.enums.QuestionSubmitStatusEnum;
 import com.oj.model.vo.QuestionSubmitVO;
+import com.oj.questionservice.manager.RedissonLimitManager;
 import com.oj.questionservice.mapper.QuestionSubmitMapper;
+import com.oj.questionservice.rabbitmq.OjMessageProducer;
 import com.oj.questionservice.service.QuestionSubmitService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -43,11 +45,18 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
     @Resource
     private UserServiceFeignClient userServiceFeignClient;
 
+
+    @Resource
+    private RedissonLimitManager redissonLimitManager;
+
+    @Resource
+    private OjMessageProducer ojMessageProducer;
+
     @Resource
     @Lazy
-    private JudgeServiceFeignClient judgeService;
+    private JudgeServiceFeignClient judgeServiceFeignClient;
 
-    //返回题目的提交id
+    //返回题目的提交id  使用RedissonLimit进行限流操作
     @Override
     public Long doQuestionSubmit(QuestionSubmitAddRequest questionSubmitAddRequest, User loginUser) {
         String language = questionSubmitAddRequest.getLanguage();
@@ -55,14 +64,16 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         if (questionSubmitLanguage == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "提交的编程语言类型错误");
         }
+        Long id = loginUser.getId();
+        //设置限流
+        redissonLimitManager.doRateLimit("doQuestionSubmit_" + id);
         String code = questionSubmitAddRequest.getCode();
         Long questionId = questionSubmitAddRequest.getQuestionId();
-        Long id = loginUser.getId();
         QuestionSubmit questionSubmit = new QuestionSubmit();
         questionSubmit.setLanguage(language);
         questionSubmit.setCode(code);
         questionSubmit.setJudgeInfo("{}");
-        //设置初始的判题状态 (等待中)
+        //设置初始的判题状态(等待中)
         questionSubmit.setStatus(QuestionSubmitStatusEnum.WAITING.getValue());
         questionSubmit.setQuestionId(questionId);
         questionSubmit.setUserId(id);
@@ -72,12 +83,16 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "数据保存失败");
         }
         Long submitId = questionSubmit.getId();
-        //执行判题服务(异步执行)  异步执行时调用接口到达超时时间不会报错
-        CompletableFuture.runAsync(() -> {
-            judgeService.doJudge(submitId);
-        });
+        /**
+         * 使用rabbitmq进行异步化解耦
+         */
+        ojMessageProducer.sendMessage(String.valueOf(submitId));
 
-//        judgeService.doJudge(submitId);
+        //执行判题服务(异步执行)  异步执行时调用接口到达超时时间不会报错
+//        CompletableFuture.runAsync(() -> {
+//            judgeServiceFeignClient.doJudge(submitId);
+//        });
+        //judgeService.doJudge(submitId);
 
         return submitId;
     }
@@ -101,7 +116,6 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         Long userId = questionSubmitQueryRequest.getUserId();
         String sortField = questionSubmitQueryRequest.getSortField();
         String sortOrder = questionSubmitQueryRequest.getSortOrder();
-
         // 拼接查询条件
         queryWrapper.eq(StringUtils.isNotBlank(language), "language", language);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
@@ -138,7 +152,6 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         questionSubmitVOPage.setRecords(questionSubmitVOList);
         return questionSubmitVOPage;
     }
-
 }
 
 

@@ -5,13 +5,10 @@ import com.oj.client.service.QuestionServiceFeignClient;
 import com.oj.common.common.ErrorCode;
 import com.oj.common.exception.BusinessException;
 import com.oj.judgeservice.judge.codesandbox.CodeSandBoxFactory;
-import com.oj.judgeservice.judge.codesandbox.CodeSanBoxProxy;
 import com.oj.judgeservice.judge.codesandbox.CodeSandBox;
+import com.oj.judgeservice.judge.codesandbox.CodeSandBoxProxy;
 import com.oj.judgeservice.judge.startegy.JudgeContext;
-import com.oj.model.dto.question.ExecuteCodeRequest;
-import com.oj.model.dto.question.ExecuteCodeResponse;
-import com.oj.model.dto.question.JudgeCase;
-import com.oj.model.dto.question.JudgeInfo;
+import com.oj.model.dto.question.*;
 import com.oj.model.entity.Question;
 import com.oj.model.entity.QuestionSubmit;
 import com.oj.model.enums.QuestionSubmitStatusEnum;
@@ -60,7 +57,7 @@ public class JudgeServiceImpl implements JudgeService {
         }
         //调用代码沙箱得到执行结果
         CodeSandBox codeSandBox = CodeSandBoxFactory.createCodeSandBoxByType(type);
-        CodeSanBoxProxy codeSanBoxProxy = new CodeSanBoxProxy(codeSandBox);
+        CodeSandBoxProxy codeSandBoxProxy = new CodeSandBoxProxy(codeSandBox);
         String language = questionSubmit.getLanguage();
         String code = questionSubmit.getCode();
         //数据库保存的是json格式 需要将其转换为List
@@ -72,7 +69,7 @@ public class JudgeServiceImpl implements JudgeService {
                 .inputList(inputList)
                 .language(language)
                 .build();
-        ExecuteCodeResponse executeCodeResponse = codeSanBoxProxy.executeCode(executeCodeRequest);
+        ExecuteCodeResponse executeCodeResponse = codeSandBoxProxy.executeCode(executeCodeRequest);
         List<String> outputList = executeCodeResponse.getOutputList();
         JudgeContext judgeContext = new JudgeContext();
         judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
