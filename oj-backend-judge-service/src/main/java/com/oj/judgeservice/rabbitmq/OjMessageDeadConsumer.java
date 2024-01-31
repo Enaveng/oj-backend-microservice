@@ -1,8 +1,11 @@
 package com.oj.judgeservice.rabbitmq;
 
+import cn.hutool.json.JSONUtil;
 import com.oj.common.common.ErrorCode;
 import com.oj.common.config.RabbitMqConfig;
 import com.oj.common.exception.BusinessException;
+import com.oj.model.entity.QuestionSubmit;
+import com.oj.model.enums.QuestionSubmitStatusEnum;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -29,8 +32,12 @@ public class OjMessageDeadConsumer {
             channel.basicNack(deliveryTag, false, false);
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "消息为空");
         }
-        long questionId = Long.parseLong(message);
-
+        long questionSubmitId = Long.parseLong(message);
+        //修改题目状态为失败
+        QuestionSubmit questionSubmitUpdate = new QuestionSubmit();
+        questionSubmitUpdate.setId(questionSubmitId);
+        //将JudgeInfo对象转换为json对象
+        questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.FAILED.getValue());
         // 确认消息
         channel.basicAck(deliveryTag, false);
     }
